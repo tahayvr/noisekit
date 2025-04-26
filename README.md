@@ -10,36 +10,12 @@
 - Adds common `shadcn-svelte` components: `button`, `input`, `textarea`, `label`, `select`, `checkbox`, `radio-group`, `card`, `separator`, `dialog`, `aspect-ratio`, `sidebar`.
 - Installs `svelte-seo` for basic SEO needs.
 
-## Installation
-
-To use `noisekit` locally or for development:
-
-1.  Clone this repository:
-    ```bash
-    git clone
-    cd noisekit
-    ```
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Link the package globally:
-    ```bash
-    npm link
-    ```
-
-Alternatively, once published to npm, you can install it globally:
-
-```bash
-npm
-```
-
 ## Usage
 
-After installation (either via linking or global install), run the following command:
+To start a new project using this boilerplate, run the following command:
 
 ```bash
-create-noisekit
+npx noisekit
 ```
 
 The tool will prompt you for the name of your new project.
