@@ -29,11 +29,28 @@ It will then perform the following steps:
 5.  Install `svelte-seo`.
 6.  Display a success message.
 
-After the process completes, you can navigate into your new project directory:
+After the process completes, you can navigate into your new SvelteKit project directory:
 
 ```bash
 cd <your-project-name>
 npm run dev
+```
+
+## Local Installation
+
+To install `noisekit` locally for development:
+
+```bash
+git clone https://github.com/yourusername/noisekit.git
+cd noisekit
+npm install
+npm link
+```
+
+This will create a global symlink to your local version of `noisekit`. You can then use it by running:
+
+```bash
+npx noisekit
 ```
 
 ## Development
