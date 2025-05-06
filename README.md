@@ -41,7 +41,7 @@ npm run dev
 To install `noisekit` locally for development:
 
 ```bash
-git clone https://github.com/yourusername/noisekit.git
+git clone https://github.com/tahayvr/noisekit.git
 cd noisekit
 npm install
 npm link
