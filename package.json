@@ -1,8 +1,8 @@
 {
   "name": "noisekit",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
-  "description": "My personal SvelteKit starter template",
+  "description": "Start a SvelteKit project with the perfect stack.",
   "main": "lib/index.js",
   "repository": {
     "type": "git",
@@ -17,7 +17,9 @@
   "keywords": [
     "sveltekit",
     "starter",
-    "template"
+    "template",
+    "noisekit",
+    "taha"
   ],
   "author": "noiseRandom",
   "license": "MIT",
