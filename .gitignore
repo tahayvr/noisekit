@@ -99,3 +99,6 @@ dist
 
 # cursor
 .cursor/
+
+#proj
+/project_management

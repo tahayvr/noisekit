@@ -1,18 +1,21 @@
-# noisekit
+<h1 align="center">
+ noiseKit
+</h1>
 
-`noisekit` is a command-line tool to quickly scaffold a new SvelteKit project with a pre-configured setup, including Tailwind CSS, shadcn-svelte, and svelte-seo.
+`noisekit` is a CLI to quickly scaffold a new SvelteKit project with a noiseKit stack.
 
-## Features
+## The noiseKit Stack
 
-- Initializes a SvelteKit project (using `minimal` template, TypeScript).
-- Integrates Tailwind CSS.
-- Initializes `shadcn-svelte`.
-- Adds common `shadcn-svelte` components: `button`, `input`, `textarea`, `label`, `select`, `checkbox`, `radio-group`, `card`, `separator`, `dialog`, `aspect-ratio`, `sidebar`.
-- Installs `svelte-seo` for basic SEO needs.
+A web dev stack by noiseRandom.
 
-## Usage
+- [SvelteKit](https://svelte.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Shadcn-svelte](https://next.shadcn-svelte.com/)
 
-To start a new project using this boilerplate, run the following command:
+## Getting Started
+
+To start a new project using the noiseKit stack, run the following command:
 
 ```bash
 npx noisekit
@@ -35,31 +38,6 @@ After the process completes, you can navigate into your new SvelteKit project di
 cd <your-project-name>
 npm run dev
 ```
-
-## Local Installation
-
-To install `noisekit` locally for development:
-
-```bash
-git clone https://github.com/tahayvr/noisekit.git
-cd noisekit
-npm install
-npm link
-```
-
-This will create a global symlink to your local version of `noisekit`. You can then use it by running:
-
-```bash
-npx noisekit
-```
-
-## Development
-
-If you want to contribute or modify `noisekit`:
-
-1.  Follow the local installation steps above.
-2.  Make your changes in the `bin/cli.js` or other relevant files.
-3.  Since `npm link` creates a symbolic link, your changes will be reflected immediately when you run `create-noisekit`.
 
 ## License
 

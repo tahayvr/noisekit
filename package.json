@@ -4,6 +4,10 @@
   "type": "module",
   "description": "My personal SvelteKit starter template",
   "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tahayvr/noisekit.git"
+  },
   "bin": {
     "create-noisekit": "bin/cli.js"
   },
