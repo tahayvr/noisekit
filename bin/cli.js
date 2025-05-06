@@ -3,9 +3,31 @@
 import prompts from "prompts";
 import { execSync } from "child_process";
 import chalk from "chalk";
+import gradient from "gradient-string";
 import process from "process";
 
+function displayBanner() {
+  // Custom gradient colors - using fewer colors for a smoother horizontal transition
+  const gradientColors = gradient([
+    "#F59E0B", // noiseKit AMBER
+    "#B91C1C", // noiseKit RED
+  ]).multiline;
+
+  console.log(
+    gradientColors(String.raw`
+     _   _  ___  ___ ____  _____ _  _____ _____ 
+    | \ | |/ _ \|_ _/ ___|| ____| |/ /_ _|_   _|
+    |  \| | | | || |\___ \|  _| | ' / | |  | |  
+    | |\  | |_| || | ___) | |___| . \ | |  | |  
+    |_| \_|\___/|___|____/|_____|_|\_\___| |_|  
+                                                
+  `)
+  );
+}
+
 async function run() {
+  displayBanner();
+
   const response = await prompts({
     type: "text",
     name: "projectName",
