@@ -2,7 +2,7 @@
 <img src="assets/noiseKit-banner.svg" alt="noiseKit" width="300"/>
 </p>
 
-`noisekit` is a CLI to quickly scaffold a new SvelteKit project with the noiseKit stack.
+`noisekit` is a CLI tool to quickly scaffold a new SvelteKit project with the noiseKit stack.
 
 ## The noiseKit Stack
 
