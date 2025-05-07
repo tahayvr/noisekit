@@ -42,7 +42,7 @@ async function run() {
     process.exit(1);
   }
 
-  const command = `npx sv create ${projectName} --template minimal --types ts --install npm`;
+  const command = `npx sv create ${projectName} --template minimal --types ts --no-add-ons --install npm`;
 
   try {
     console.log(chalk.blue(`Creating SvelteKit project: ${projectName}...`));
@@ -51,40 +51,52 @@ async function run() {
 
     // Change directory to the newly created project
     const projectPath = `./${projectName}`;
+    const originalDir = process.cwd();
+    process.chdir(projectPath);
 
-    console.log(chalk.blue(`Adding Tailwind CSS to ${projectName}...`));
-    const tailwindCommand = `npx sv@0.6.18 add tailwindcss`;
-    execSync(tailwindCommand, { stdio: "inherit", cwd: projectPath });
-    console.log(
-      chalk.green(`Successfully added Tailwind CSS to ${projectName}!`)
-    );
+    try {
+      console.log(chalk.blue(`Adding Tailwind CSS to ${projectName}...`));
+      const tailwindCommand = `npx sv@0.6.18 add --tailwindcss=typography --no-install`;
+      execSync(tailwindCommand, { stdio: "inherit" });
+      console.log(
+        chalk.green(`Successfully added Tailwind CSS to ${projectName}!`)
+      );
 
-    console.log(chalk.blue(`Initializing shadcn-svelte in ${projectName}...`));
-    const shadcnInitCommand = `npx shadcn-svelte@next init`;
-    execSync(shadcnInitCommand, { stdio: "inherit", cwd: projectPath });
-    console.log(
-      chalk.green(`Successfully initialized shadcn-svelte in ${projectName}!`)
-    );
+      console.log(
+        chalk.blue(`Initializing shadcn-svelte in ${projectName}...`)
+      );
+      const shadcnInitCommand = `npx shadcn-svelte@next init`;
+      execSync(shadcnInitCommand, { stdio: "inherit" });
+      console.log(
+        chalk.green(`Successfully initialized shadcn-svelte in ${projectName}!`)
+      );
 
-    console.log(
-      chalk.blue(
-        `Adding shadcn-svelte components (button) to ${projectName}...`
-      )
-    );
-    const shadcnAddComponentCommand = `npx shadcn-svelte@next add button input textarea label select checkbox radio-group card separator dialog aspect-ratio sidebar`;
-    execSync(shadcnAddComponentCommand, { stdio: "inherit", cwd: projectPath });
-    console.log(
-      chalk.green(
-        `Successfully added shadcn-svelte components to ${projectName}!`
-      )
-    );
+      console.log(
+        chalk.blue(
+          `Adding shadcn-svelte components (button) to ${projectName}...`
+        )
+      );
+      const shadcnAddComponentCommand = `npx shadcn-svelte@next add -y button input textarea label select checkbox radio-group card separator dialog aspect-ratio sidebar`;
+      execSync(shadcnAddComponentCommand, { stdio: "inherit" });
+      console.log(
+        chalk.green(
+          `Successfully added shadcn-svelte components to ${projectName}!`
+        )
+      );
 
-    console.log(chalk.blue(`Installing svelte-seo in ${projectName}...`));
-    const installSeoCommand = `npm install -D svelte-seo`;
-    execSync(installSeoCommand, { stdio: "inherit", cwd: projectPath });
-    console.log(
-      chalk.green(`Successfully installed svelte-seo in ${projectName}!`)
-    );
+      console.log(chalk.blue(`Installing svelte-seo in ${projectName}...`));
+      const installSeoCommand = `npm install -D svelte-seo`;
+      execSync(installSeoCommand, { stdio: "inherit" });
+      console.log(
+        chalk.green(`Successfully installed svelte-seo in ${projectName}!`)
+      );
+    } catch (innerError) {
+      console.error(chalk.red(`An error occurred: ${innerError.message}`));
+      throw innerError;
+    } finally {
+      // Always change back to original directory
+      process.chdir(originalDir);
+    }
 
     console.log(
       chalk.bold.magenta(`
