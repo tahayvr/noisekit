@@ -40,17 +40,17 @@ function execSilent(command, cwd = process.cwd()) {
 async function run() {
   // Start with banner and intro
   displayBanner();
-  p.intro(`${color.magenta("noiseKit")} - Modern SvelteKit Starter`);
+  p.intro(`${color.red("noiseKit")} - Modern SvelteKit Starter`);
 
   // Get project name
   const projectName = await p.text({
-    message: "What would you like to name your project?",
+    message: "What would you like to name your app?",
     placeholder: "my-sveltekit-app",
     validate(value) {
-      if (!value) return "Please enter a project name.";
-      if (value.includes(" ")) return "Project name cannot contain spaces.";
+      if (!value) return "Please enter an app name.";
+      if (value.includes(" ")) return "App name cannot contain spaces.";
       if (!/^[a-z0-9-_]+$/i.test(value))
-        return "Project name can only include alphanumeric characters, hyphens, and underscores.";
+        return "App name can only include alphanumeric characters, hyphens, and underscores.";
     },
   });
 
@@ -63,38 +63,28 @@ async function run() {
   // Project path
   const projectPath = `./${projectName}`;
 
-  // Additional features selection
-  const components = await p.multiselect({
-    message: "Which UI component sets would you like to include?",
-    options: [
-      // Temporarily commenting out shadcn components until we figure out options
-      // { value: 'basic', label: 'Basic Components', hint: 'button, input, textarea, label' },
-      // { value: 'form', label: 'Form Components', hint: 'select, checkbox, radio-group' },
-      // { value: 'layout', label: 'Layout Components', hint: 'card, separator, aspect-ratio, sidebar' },
-      // { value: 'dialog', label: 'Dialog Components', hint: 'dialog' }
-      {
-        value: "none",
-        label: "None for now",
-        hint: "shadcn integration coming soon",
-      },
-    ],
-    required: true,
-    initialValues: ["none"],
-  });
-
-  // Handle cancellation
-  if (p.isCancel(components)) {
-    p.cancel("Operation cancelled.");
-    process.exit(0);
-  }
+  // For now, we're skipping component selection until shadcn integration is ready
+  const components = ["none"];
 
   // Additional utilities
   const utilities = await p.multiselect({
     message: "Would you like to install additional packages?",
     options: [
-      { value: "svelte-seo", label: "SEO Support", hint: "svelte-seo" },
+      { value: "eslint", label: "ESLint", hint: "linting" },
+      {
+        value: "prettier",
+        label: "Prettier",
+        hint: "code formatting",
+      },
+      { value: "playwright", label: "Playwright", hint: "browser testing" },
+      { value: "vitest", label: "Testing", hint: "testing" },
+      {
+        value: "svelte-seo",
+        label: "SEO Support",
+        hint: "seo for svelte apps",
+      },
     ],
-    initialValues: ["svelte-seo"],
+    required: false,
   });
 
   // Handle cancellation
@@ -103,12 +93,32 @@ async function run() {
     process.exit(0);
   }
 
-  // Create component list for shadcn
+  // Define package installation configuration with custom commands
+  const packageConfigs = {
+    eslint: {
+      command: "npx sv add eslint",
+      description: "Installing ESLint",
+    },
+    prettier: {
+      command: "npx sv add prettier",
+      description: "Installing Prettier",
+    },
+    playwright: {
+      command: "npx sv add playwright",
+      description: "Installing Playwright",
+    },
+    vitest: {
+      command: "npx sv add vitest",
+      description: "Installing Vitest",
+    },
+    "svelte-seo": {
+      command: "npm install -D svelte-seo",
+      description: "Installing SEO package",
+    },
+  };
+
+  // Create component list for shadcn (for future use)
   const componentMap = {
-    // basic: ["button", "input", "textarea", "label"],
-    // form: ["select", "checkbox", "radio-group"],
-    // layout: ["card", "separator", "aspect-ratio", "sidebar"],
-    // dialog: ["dialog"]
     none: [],
   };
 
@@ -116,28 +126,26 @@ async function run() {
     .flatMap((set) => componentMap[set] || [])
     .join(" ");
 
-  // Create packages list
-  const packageMap = {
-    "svelte-seo": "svelte-seo",
-  };
-
-  const selectedPackages = utilities
-    .map((util) => packageMap[util])
-    .filter(Boolean)
-    .join(" ");
+  // Create list of selected package configurations
+  const selectedPackageConfigs = utilities
+    .map((util) => packageConfigs[util])
+    .filter(Boolean);
 
   // Show summary before starting
   p.note(
-    `${color.magenta("Project setup summary:")}\n` +
-      `• Project Name: ${color.green(projectName)}\n` +
-      // `• Components: ${color.green(components.join(', ') || 'None')}\n` +
-      `• Additional Packages: ${color.green(utilities.join(", ") || "None")}`,
+    `• App Name: ${color.yellow(projectName)}\n` +
+      `• Additional Packages: ${
+        utilities.length > 0
+          ? "\n  " +
+            utilities.map((pkg) => color.yellow(`- ${pkg}`)).join("\n  ")
+          : color.yellow("None")
+      }`,
     "Creating your noiseKit project"
   );
 
   // Confirmation
   const confirmed = await p.confirm({
-    message: "Ready to create your project?",
+    message: "Ready to create your app?",
   });
 
   if (p.isCancel(confirmed) || !confirmed) {
@@ -191,16 +199,23 @@ async function run() {
       }
     },
     */
-    {
-      title: "Installing additional packages",
+
+    // Create dynamic tasks for each selected package
+    ...selectedPackageConfigs.map((pkg) => ({
+      title: pkg.description,
       task: async () => {
         await sleep(300);
-        if (selectedPackages) {
-          execSilent(`npm install -D ${selectedPackages}`, projectPath);
+        execSilent(pkg.command, projectPath);
+
+        // Run post-install steps if they exist
+        if (pkg.postInstall) {
+          await pkg.postInstall(projectPath);
         }
-        return "Additional packages installed successfully!";
+
+        return `${pkg.description} completed`;
       },
-    },
+    })),
+
     {
       title: "Finalizing project setup",
       task: async () => {
@@ -213,10 +228,11 @@ async function run() {
 
   // Final success message
   p.outro(
-    `${color.green("✓")} ${color.bold("Project created successfully!")}\n\n` +
+    `${color.red("✓")} ${color.bold("Project created successfully!")}\n\n` +
       `To get started:\n` +
-      `  ${color.cyan(`cd ${projectName}`)}\n` +
-      `  ${color.cyan("npm run dev")}\n\n` +
+      `•  ${color.yellow(`cd ${projectName}`)}\n` +
+      `•  ${color.yellow("npm install")}\n` +
+      `•  ${color.yellow("npm run dev")}\n\n` +
       `Happy coding! 🚀`
   );
 }
