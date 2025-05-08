@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+// This is a clone of the main CLI script for development testing
+// You can modify this file without affecting the published CLI
+
 import { execSync, spawn } from "child_process";
 import gradient from "gradient-string";
 import process from "process";
@@ -7,7 +10,7 @@ import * as p from "@clack/prompts";
 import { setTimeout as sleep } from "node:timers/promises";
 import color from "picocolors";
 
-// Banner display
+// Banner display with "DEV MODE" indicator
 function displayBanner() {
   // Custom gradient colors
   const gradientColors = gradient([
@@ -25,6 +28,7 @@ function displayBanner() {
                                                 
   `)
   );
+  console.log(color.magenta("  [ DEVELOPMENT MODE ]"));
 }
 
 // Execute command silently and return output
@@ -40,12 +44,13 @@ function execSilent(command, cwd = process.cwd()) {
 async function run() {
   // Start with banner and intro
   displayBanner();
-  p.intro(`${color.magenta("noiseKit")} - Modern SvelteKit Starter`);
+  p.intro(`${color.magenta("noiseKit DEV")} - Modern SvelteKit Starter`);
 
-  // Get project name
+  // Get project name with test prefix to avoid conflicts
   const projectName = await p.text({
     message: "What would you like to name your project?",
-    placeholder: "my-sveltekit-app",
+    placeholder: "test-project",
+    initialValue: `test-${Date.now().toString().slice(-6)}`,
     validate(value) {
       if (!value) return "Please enter a project name.";
       if (value.includes(" ")) return "Project name cannot contain spaces.";

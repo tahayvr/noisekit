@@ -12,7 +12,9 @@
     "create-noisekit": "bin/cli.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: No tests specified\" && exit 1",
+    "test:cli": "node bin/cli.js",
+    "dev:cli": "node bin/dev-cli.js"
   },
   "keywords": [
     "sveltekit",
@@ -24,10 +26,12 @@
   "author": "noiseRandom",
   "license": "MIT",
   "dependencies": {
+    "@clack/prompts": "^0.10.1",
     "chalk": "^5.4.1",
     "commander": "^13.1.0",
     "fs-extra": "^11.3.0",
     "gradient-string": "^3.0.0",
+    "picocolors": "^1.1.1",
     "prompts": "^2.4.2"
   },
   "devDependencies": {
