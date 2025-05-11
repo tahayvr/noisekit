@@ -11,7 +11,7 @@ A web dev stack by noiseRandom.
 - [SvelteKit](https://svelte.dev/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
-- [Shadcn-svelte](https://next.shadcn-svelte.com/) Coming Soon
+- [Shadcn](https://next.shadcn-svelte.com/) Coming Soon
 
 ## Getting Started
 
