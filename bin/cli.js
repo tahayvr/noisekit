@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { execSync, spawn } from "child_process";
+import { execSync } from "child_process";
 import gradient from "gradient-string";
 import process from "process";
 import * as p from "@clack/prompts";
@@ -63,8 +63,8 @@ async function run() {
   // Project path
   const projectPath = `./${projectName}`;
 
-  // For now, we're skipping component selection until shadcn integration is ready
-  const components = ["none"];
+  // Skip component selection for now
+  // const components = ["none"];
 
   // Additional utilities
   const utilities = await p.multiselect({
@@ -96,19 +96,19 @@ async function run() {
   // Define package installation configuration with custom commands
   const packageConfigs = {
     eslint: {
-      command: "npx sv add eslint",
+      command: "npx sv add eslint --no-preconditions",
       description: "Installing ESLint",
     },
     prettier: {
-      command: "npx sv add prettier",
+      command: "npx sv add prettier --no-preconditions",
       description: "Installing Prettier",
     },
     playwright: {
-      command: "npx sv add playwright",
+      command: "npx sv add playwright --no-preconditions",
       description: "Installing Playwright",
     },
     vitest: {
-      command: "npx sv add vitest",
+      command: "npx sv add vitest --no-preconditions",
       description: "Installing Vitest",
     },
     "svelte-seo": {
@@ -117,14 +117,14 @@ async function run() {
     },
   };
 
-  // Create component list for shadcn (for future use)
-  const componentMap = {
-    none: [],
-  };
-
-  const selectedComponents = components
-    .flatMap((set) => componentMap[set] || [])
-    .join(" ");
+  // Create component list for shadcn
+  // const componentMap = {
+  //   basic: ["button", "input", "textarea, label"],
+  //   form: ["select", "checkbox", "radio-group"],
+  //   layout: ["card", "separator", "aspect-ratio", "sidebar"],
+  //   dialog: ["dialog"],
+  //   none: [],
+  // };
 
   // Create list of selected package configurations
   const selectedPackageConfigs = utilities
@@ -134,6 +134,7 @@ async function run() {
   // Show summary before starting
   p.note(
     `• App Name: ${color.yellow(projectName)}\n` +
+      // No need to show components in summary since it's not selectable now
       `• Additional Packages: ${
         utilities.length > 0
           ? "\n  " +
@@ -154,7 +155,7 @@ async function run() {
   }
 
   // Use task system to execute all tasks with spinners
-  const results = await p.tasks([
+  await p.tasks([
     {
       title: "Creating SvelteKit project",
       task: async () => {
@@ -165,19 +166,7 @@ async function run() {
         return "SvelteKit project created successfully!";
       },
     },
-    {
-      title: "Setting up Tailwind CSS with Typography",
-      task: async () => {
-        await sleep(300);
-        execSilent(
-          `npx sv@0.6.18 add --tailwindcss=typography --no-install`,
-          projectPath
-        );
-        // Install dependencies after Tailwind is set up
-        execSilent(`npm install`, projectPath);
-        return "Tailwind CSS configured successfully!";
-      },
-    },
+
     // Commenting out shadcn initialization temporarily
     /*
     {
@@ -215,6 +204,20 @@ async function run() {
         return `${pkg.description} completed`;
       },
     })),
+
+    {
+      title: "Setting up Tailwind CSS with Typography",
+      task: async () => {
+        await sleep(300);
+        execSilent(
+          `npx sv@0.6.18 add --tailwindcss=typography --no-install --no-preconditions`,
+          projectPath
+        );
+        // Install dependencies after Tailwind is set up
+        execSilent(`npm install`, projectPath);
+        return "Tailwind CSS configured successfully!";
+      },
+    },
 
     {
       title: "Finalizing project setup",

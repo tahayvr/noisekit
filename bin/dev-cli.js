@@ -3,7 +3,7 @@
 // This is a clone of the main CLI script for development testing
 // You can modify this file without affecting the published CLI
 
-import { execSync, spawn } from "child_process";
+import { execSync } from "child_process";
 import gradient from "gradient-string";
 import process from "process";
 import * as p from "@clack/prompts";
@@ -68,35 +68,8 @@ async function run() {
   // Project path
   const projectPath = `./${projectName}`;
 
-  // Additional features selection
-  /*
-  const components = await p.multiselect({
-    message: "Which UI component sets would you like to include?",
-    options: [
-      // Temporarily commenting out shadcn components until we figure out options
-      // { value: 'basic', label: 'Basic Components', hint: 'button, input, textarea, label' },
-      // { value: 'form', label: 'Form Components', hint: 'select, checkbox, radio-group' },
-      // { value: 'layout', label: 'Layout Components', hint: 'card, separator, aspect-ratio, sidebar' },
-      // { value: 'dialog', label: 'Dialog Components', hint: 'dialog' }
-      {
-        value: "none",
-        label: "None for now",
-        hint: "shadcn integration coming soon",
-      },
-    ],
-    required: true,
-    initialValues: ["none"],
-  });
-
-  // Handle cancellation
-  if (p.isCancel(components)) {
-    p.cancel("Operation cancelled.");
-    process.exit(0);
-  }
-  */
-
-  // Define a default value for components since we're skipping the selection
-  const components = ["none"];
+  // Skip component selection for now
+  // const components = ["none"];
 
   // Additional utilities
   const utilities = await p.multiselect({
@@ -128,19 +101,19 @@ async function run() {
   // Define package installation configuration with custom commands
   const packageConfigs = {
     eslint: {
-      command: "npx sv add eslint",
+      command: "npx sv add eslint --no-preconditions",
       description: "Installing ESLint",
     },
     prettier: {
-      command: "npx sv add prettier",
+      command: "npx sv add prettier --no-preconditions",
       description: "Installing Prettier",
     },
     playwright: {
-      command: "npx sv add playwright",
+      command: "npx sv add playwright --no-preconditions",
       description: "Installing Playwright",
     },
     vitest: {
-      command: "npx sv add vitest",
+      command: "npx sv add vitest --no-preconditions",
       description: "Installing Vitest",
     },
     "svelte-seo": {
@@ -150,17 +123,13 @@ async function run() {
   };
 
   // Create component list for shadcn
-  const componentMap = {
-    // basic: ["button", "input", "textarea", "label"],
-    // form: ["select", "checkbox", "radio-group"],
-    // layout: ["card", "separator", "aspect-ratio", "sidebar"],
-    // dialog: ["dialog"]
-    none: [],
-  };
-
-  const selectedComponents = components
-    .flatMap((set) => componentMap[set] || [])
-    .join(" ");
+  // const componentMap = {
+  //   basic: ["button", "input", "textarea, label"],
+  //   form: ["select", "checkbox", "radio-group"],
+  //   layout: ["card", "separator", "aspect-ratio", "sidebar"],
+  //   dialog: ["dialog"],
+  //   none: [],
+  // };
 
   // Create list of selected package configurations
   const selectedPackageConfigs = utilities
@@ -191,7 +160,7 @@ async function run() {
   }
 
   // Use task system to execute all tasks with spinners
-  const results = await p.tasks([
+  await p.tasks([
     {
       title: "Creating SvelteKit project",
       task: async () => {
@@ -202,19 +171,7 @@ async function run() {
         return "SvelteKit project created successfully!";
       },
     },
-    {
-      title: "Setting up Tailwind CSS with Typography",
-      task: async () => {
-        await sleep(300);
-        execSilent(
-          `npx sv@0.6.18 add --tailwindcss=typography --no-install`,
-          projectPath
-        );
-        // Install dependencies after Tailwind is set up
-        execSilent(`npm install`, projectPath);
-        return "Tailwind CSS configured successfully!";
-      },
-    },
+
     // Commenting out shadcn initialization temporarily
     /*
     {
@@ -252,6 +209,19 @@ async function run() {
         return `${pkg.description} completed`;
       },
     })),
+    {
+      title: "Setting up Tailwind CSS with Typography",
+      task: async () => {
+        await sleep(300);
+        execSilent(
+          `npx sv@0.6.18 add --tailwindcss=typography --no-install --no-preconditions`,
+          projectPath
+        );
+        // Install dependencies after Tailwind is set up
+        execSilent(`npm install`, projectPath);
+        return "Tailwind CSS configured successfully!";
+      },
+    },
 
     {
       title: "Finalizing project setup",
