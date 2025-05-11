@@ -14,7 +14,8 @@
   "scripts": {
     "test": "echo \"Error: No tests specified\" && exit 1",
     "test:cli": "node bin/cli.js",
-    "dev:cli": "node bin/dev-cli.js"
+    "dev:cli": "node bin/dev-cli.js",
+    "semantic-release": "semantic-release"
   },
   "keywords": [
     "sveltekit",
@@ -35,6 +36,7 @@
     "prompts": "^2.4.2"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
     "semantic-release": "^24.2.3"
   }
 }

@@ -1,5 +1,5 @@
 <p align="center">
-<img src="assets/noiseKit-banner.svg" alt="noiseKit" width="300"/>
+<img src="assets/noiseKit.svg" alt="noiseKit" width="300"/>
 </p>
 
 `noisekit` is a CLI tool to quickly scaffold a new SvelteKit project with the noiseKit stack.
@@ -25,6 +25,7 @@ After the process completes, you can navigate into your new SvelteKit project di
 
 ```bash
 cd <your-project-name>
+npm install
 npm run dev
 ```
 

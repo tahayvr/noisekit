@@ -1,0 +1,32 @@
+# Development and test files
+/test
+test-*
+/bin/dev-cli.js
+
+# Source control
+.git
+.github
+.gitignore
+
+# CI/CD
+.releaserc.json
+.github/workflows
+
+# Development config
+.vscode
+.editorconfig
+.eslintrc
+.prettierrc
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependency directories
+node_modules
+
+# Documentation that doesn't need to be published
+/docs
+CONTRIBUTING.md
+CHANGELOG.md 
