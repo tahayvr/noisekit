@@ -11,6 +11,11 @@
   "bin": {
     "create-noisekit": "bin/cli.js"
   },
+  "release": {
+    "branches": [
+      "main"
+    ]
+  },
   "scripts": {
     "test": "echo \"Error: No tests specified\" && exit 1",
     "test:cli": "node bin/cli.js",
@@ -32,7 +37,6 @@
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
-    "@semantic-release/changelog": "^6.0.3",
     "semantic-release": "^24.2.3"
   }
 }

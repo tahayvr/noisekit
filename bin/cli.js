@@ -7,9 +7,8 @@ import * as p from "@clack/prompts";
 import { setTimeout as sleep } from "node:timers/promises";
 import color from "picocolors";
 
-// Banner display
+// Banner
 function displayBanner() {
-  // Custom gradient colors
   const gradientColors = gradient([
     "#F59E0B", // noiseKit AMBER
     "#B91C1C", // noiseKit RED
@@ -63,9 +62,6 @@ async function run() {
   // Project path
   const projectPath = `./${projectName}`;
 
-  // Skip component selection for now
-  // const components = ["none"];
-
   // Additional utilities
   const utilities = await p.multiselect({
     message: "Would you like to install additional packages?",
@@ -117,15 +113,6 @@ async function run() {
     },
   };
 
-  // Create component list for shadcn
-  // const componentMap = {
-  //   basic: ["button", "input", "textarea, label"],
-  //   form: ["select", "checkbox", "radio-group"],
-  //   layout: ["card", "separator", "aspect-ratio", "sidebar"],
-  //   dialog: ["dialog"],
-  //   none: [],
-  // };
-
   // Create list of selected package configurations
   const selectedPackageConfigs = utilities
     .map((util) => packageConfigs[util])
@@ -166,28 +153,6 @@ async function run() {
         return "SvelteKit project created successfully!";
       },
     },
-
-    // Commenting out shadcn initialization temporarily
-    /*
-    {
-      title: 'Initializing shadcn-svelte',
-      task: async () => {
-        await sleep(300);
-        execSilent(`npx shadcn-svelte@next init`, projectPath);
-        return 'shadcn-svelte initialized successfully!';
-      }
-    },
-    {
-      title: 'Installing UI components',
-      task: async () => {
-        await sleep(300);
-        if (selectedComponents) {
-          execSilent(`npx shadcn-svelte@next add -y ${selectedComponents}`, projectPath);
-        }
-        return 'UI components installed successfully!';
-      }
-    },
-    */
 
     // Create dynamic tasks for each selected package
     ...selectedPackageConfigs.map((pkg) => ({
