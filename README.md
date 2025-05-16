@@ -4,6 +4,10 @@
 
 `noisekit` is a CLI tool to quickly scaffold a new SvelteKit project with the noiseKit stack.
 
+<p align="center">
+<img src="assets/noiseKit-term.webp" alt="noiseKit screenshot" width="500"/>
+</p>
+
 ## The noiseKit Stack
 
 A web dev stack by noiseRandom.
