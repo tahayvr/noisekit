@@ -38,16 +38,11 @@ function execSilent(command, cwd = process.cwd()) {
 // Execute interactive command with real-time user input/output
 async function execInteractive(command, cwd = process.cwd()) {
   return new Promise((resolve, reject) => {
-    // Don't log the command as it might be disruptive
-    // console.log(color.dim(`Running: ${command}`));
+    // Log the command for debugging
+    console.log(color.dim(`Running: ${command}`));
 
-    // Split the command string into command and arguments
-    const parts = command.split(" ");
-    const cmd = parts[0];
-    const args = parts.slice(1);
-
-    // Spawn the process with stdio inherited for interactive prompts
-    const childProcess = spawn(cmd, args, {
+    // Use shell to execute the full command string (including cd)
+    const childProcess = spawn(command, [], {
       cwd,
       stdio: "inherit", // This allows the interactive prompts to work
       shell: true,
@@ -182,6 +177,18 @@ async function run() {
       },
     },
 
+    {
+      title: "Creating components folder",
+      task: async () => {
+        await sleep(200);
+        execSilent(`mkdir -p src/lib/components`, projectPath);
+        execSilent(`mkdir -p src/lib/components/ui`, projectPath);
+        execSilent(`mkdir -p src/lib/utils`, projectPath);
+        execSilent(`mkdir -p src/lib/hooks`, projectPath);
+        return "";
+      },
+    },
+
     // Create dynamic tasks for each selected package
     ...selectedPackageConfigs.map((pkg) => ({
       title: pkg.description,
@@ -202,13 +209,21 @@ async function run() {
       title: "Setting up Tailwind CSS with Typography",
       task: async () => {
         await sleep(300);
-        execSilent(
-          `npx sv@0.6.18 add --tailwindcss=typography --no-install --no-preconditions`,
-          projectPath
-        );
-        // Install dependencies after Tailwind is set up
-        execSilent(`npm install`, projectPath);
-        return "Tailwind CSS configured successfully!";
+        try {
+          // Try the basic tailwindcss installation first
+          execSilent(
+            `npx sv add tailwindcss="plugins:typography" --no-preconditions --no-install`,
+            projectPath
+          );
+          console.log("Tailwind CSS installed successfully");
+
+          // Install dependencies after Tailwind is set up
+          execSilent(`npm install`, projectPath);
+          return "Tailwind CSS configured successfully!";
+        } catch (error) {
+          console.error("Tailwind installation error:", error.message);
+          throw error;
+        }
       },
     },
 
@@ -238,11 +253,29 @@ async function run() {
       "Please answer the following prompts to configure shadcn-svelte:"
     );
 
+    // Debug: Show the working directory
+    p.log.info(`Working in directory: ${projectPath}`);
+
     try {
       // Run the interactive shadcn init command
-      await execInteractive(`npx shadcn-svelte@latest init`, projectPath);
+      p.log.info("Running shadcn-svelte init...");
+      await execInteractive(`npx shadcn-svelte@next init`, projectPath);
 
       p.log.success("shadcn-svelte initialized successfully!");
+
+      // Run the shadcn add command
+      p.log.info("Installing basic components...");
+      try {
+        execSilent(
+          `npx shadcn-svelte@next add --yes button input textarea label select checkbox radio-group card separator dialog aspect-ratio sidebar`,
+          projectPath
+        );
+        p.log.success("Components installed successfully!");
+      } catch (buttonError) {
+        p.log.error(
+          `Error installing basic components: ${buttonError.message}`
+        );
+      }
     } catch (error) {
       p.log.error(`Error initializing shadcn-svelte: ${error.message}`);
     }
