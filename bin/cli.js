@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { execSync } from "child_process";
+import { execSync, spawn } from "child_process";
 import gradient from "gradient-string";
 import process from "process";
 import * as p from "@clack/prompts";
@@ -33,6 +33,34 @@ function execSilent(command, cwd = process.cwd()) {
   } catch (error) {
     throw new Error(`Command failed: ${command}\n${error.message}`);
   }
+}
+
+// Execute interactive command with real-time user input/output
+async function execInteractive(command, cwd = process.cwd()) {
+  return new Promise((resolve, reject) => {
+    // Don't log the command as it might be disruptive
+    // console.log(color.dim(`Running: ${command}`));
+
+    // Split the command string into command and arguments
+    const parts = command.split(" ");
+    const cmd = parts[0];
+    const args = parts.slice(1);
+
+    // Spawn the process with stdio inherited for interactive prompts
+    const childProcess = spawn(cmd, args, {
+      cwd,
+      stdio: "inherit", // This allows the interactive prompts to work
+      shell: true,
+    });
+
+    childProcess.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`Command failed with exit code ${code}: ${command}`));
+      }
+    });
+  });
 }
 
 // Main function
@@ -193,6 +221,32 @@ async function run() {
       },
     },
   ]);
+
+  // After all main tasks are completed, ask about shadcn UI components
+  const wantsShadcn = await p.confirm({
+    message: "Would you like to install shadcn-svelte UI components?",
+  });
+
+  if (p.isCancel(wantsShadcn)) {
+    p.cancel("Operation cancelled.");
+    process.exit(0);
+  }
+
+  if (wantsShadcn) {
+    p.log.info("Setting up shadcn-svelte UI components...");
+    p.log.info(
+      "Please answer the following prompts to configure shadcn-svelte:"
+    );
+
+    try {
+      // Run the interactive shadcn init command
+      await execInteractive(`npx shadcn-svelte@latest init`, projectPath);
+
+      p.log.success("shadcn-svelte initialized successfully!");
+    } catch (error) {
+      p.log.error(`Error initializing shadcn-svelte: ${error.message}`);
+    }
+  }
 
   // Final success message
   p.outro(
