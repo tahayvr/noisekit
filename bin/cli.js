@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { execSync, spawn } from "child_process";
+import { execSync } from "child_process";
 import gradient from "gradient-string";
 import process from "process";
 import * as p from "@clack/prompts";
@@ -33,29 +33,6 @@ function execSilent(command, cwd = process.cwd()) {
   } catch (error) {
     throw new Error(`Command failed: ${command}\n${error.message}`);
   }
-}
-
-// Execute interactive command with real-time user input/output
-async function execInteractive(command, cwd = process.cwd()) {
-  return new Promise((resolve, reject) => {
-    // Log the command for debugging
-    console.log(color.dim(`Running: ${command}`));
-
-    // Use shell to execute the full command string (including cd)
-    const childProcess = spawn(command, [], {
-      cwd,
-      stdio: "inherit", // This allows the interactive prompts to work
-      shell: true,
-    });
-
-    childProcess.on("close", (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`Command failed with exit code ${code}: ${command}`));
-      }
-    });
-  });
 }
 
 // Main function
@@ -173,19 +150,11 @@ async function run() {
         execSilent(
           `npx sv create ${projectName} --template minimal --types ts --no-add-ons --install npm`
         );
-        return "SvelteKit project created successfully!";
-      },
-    },
-
-    {
-      title: "Creating components folder",
-      task: async () => {
-        await sleep(200);
         execSilent(`mkdir -p src/lib/components`, projectPath);
-        execSilent(`mkdir -p src/lib/components/ui`, projectPath);
         execSilent(`mkdir -p src/lib/utils`, projectPath);
         execSilent(`mkdir -p src/lib/hooks`, projectPath);
-        return "";
+        execSilent(`mkdir -p src/lib/components/ui`, projectPath);
+        return "SvelteKit project created successfully!";
       },
     },
 
@@ -201,7 +170,7 @@ async function run() {
           await pkg.postInstall(projectPath);
         }
 
-        return `${pkg.description} completed`;
+        return `${pkg.description} completed.`;
       },
     })),
 
@@ -215,7 +184,6 @@ async function run() {
             `npx sv add tailwindcss="plugins:typography" --no-preconditions --no-install`,
             projectPath
           );
-          console.log("Tailwind CSS installed successfully");
 
           // Install dependencies after Tailwind is set up
           execSilent(`npm install`, projectPath);
@@ -227,6 +195,33 @@ async function run() {
       },
     },
 
+    //install shadcn-svelte
+    {
+      title: "Installing shadcn-svelte",
+      task: async () => {
+        await sleep(300);
+        execSilent(
+          `npx shadcn-svelte@next init --base-color zinc --css 'src/app.css' --components-alias '$lib/components' --lib-alias '$lib' --utils-alias '$lib/utils' --hooks-alias '$lib/hooks' --ui-alias '$lib/components/ui'`,
+          projectPath
+        );
+        return "shadcn-svelte installed successfully!";
+      },
+    },
+
+    //install shadcn-svelte component
+    {
+      title: "Installing shadcn-svelte components",
+      task: async () => {
+        await sleep(300);
+        execSilent(
+          `npx shadcn-svelte@next add --yes button input textarea label select checkbox radio-group card separator dialog aspect-ratio sidebar`,
+          projectPath
+        );
+        return "shadcn-svelte components installed successfully!";
+      },
+    },
+
+    //finalize project setup
     {
       title: "Finalizing project setup",
       task: async () => {
@@ -236,50 +231,6 @@ async function run() {
       },
     },
   ]);
-
-  // After all main tasks are completed, ask about shadcn UI components
-  const wantsShadcn = await p.confirm({
-    message: "Would you like to install shadcn-svelte UI components?",
-  });
-
-  if (p.isCancel(wantsShadcn)) {
-    p.cancel("Operation cancelled.");
-    process.exit(0);
-  }
-
-  if (wantsShadcn) {
-    p.log.info("Setting up shadcn-svelte UI components...");
-    p.log.info(
-      "Please answer the following prompts to configure shadcn-svelte:"
-    );
-
-    // Debug: Show the working directory
-    p.log.info(`Working in directory: ${projectPath}`);
-
-    try {
-      // Run the interactive shadcn init command
-      p.log.info("Running shadcn-svelte init...");
-      await execInteractive(`npx shadcn-svelte@next init`, projectPath);
-
-      p.log.success("shadcn-svelte initialized successfully!");
-
-      // Run the shadcn add command
-      p.log.info("Installing basic components...");
-      try {
-        execSilent(
-          `npx shadcn-svelte@next add --yes button input textarea label select checkbox radio-group card separator dialog aspect-ratio sidebar`,
-          projectPath
-        );
-        p.log.success("Components installed successfully!");
-      } catch (buttonError) {
-        p.log.error(
-          `Error installing basic components: ${buttonError.message}`
-        );
-      }
-    } catch (error) {
-      p.log.error(`Error initializing shadcn-svelte: ${error.message}`);
-    }
-  }
 
   // Final success message
   p.outro(
