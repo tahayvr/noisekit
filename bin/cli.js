@@ -39,7 +39,7 @@ function execSilent(command, cwd = process.cwd()) {
 async function run() {
   // Start with banner and intro
   displayBanner();
-  p.intro(`${color.red("noiseKit")} - Modern SvelteKit Starter`);
+  p.intro(`${color.red("noiseKit")} - noiseRandom SvelteKit Starter`);
 
   // Get project name
   const projectName = await p.text({
@@ -131,16 +131,6 @@ async function run() {
     "Creating your noiseKit project"
   );
 
-  // Confirmation
-  const confirmed = await p.confirm({
-    message: "Ready to create your app?",
-  });
-
-  if (p.isCancel(confirmed) || !confirmed) {
-    p.cancel("Operation cancelled.");
-    process.exit(0);
-  }
-
   // Use task system to execute all tasks with spinners
   await p.tasks([
     {
@@ -170,7 +160,7 @@ async function run() {
           await pkg.postInstall(projectPath);
         }
 
-        return `${pkg.description} completed.`;
+        return `${pkg.description} completed!`;
       },
     })),
 
@@ -201,7 +191,7 @@ async function run() {
       task: async () => {
         await sleep(300);
         execSilent(
-          `npx shadcn-svelte@next init --base-color zinc --css 'src/app.css' --components-alias '$lib/components' --lib-alias '$lib' --utils-alias '$lib/utils' --hooks-alias '$lib/hooks' --ui-alias '$lib/components/ui'`,
+          `npx shadcn-svelte@latest init --base-color zinc --css 'src/app.css' --components-alias '$lib/components' --lib-alias '$lib' --utils-alias '$lib/utils' --hooks-alias '$lib/hooks' --ui-alias '$lib/components/ui'`,
           projectPath
         );
         return "shadcn-svelte installed successfully!";
@@ -214,7 +204,7 @@ async function run() {
       task: async () => {
         await sleep(300);
         execSilent(
-          `npx shadcn-svelte@next add --yes button input textarea label select checkbox radio-group card separator dialog aspect-ratio sidebar`,
+          `npx shadcn-svelte@latest add --yes button input textarea label select checkbox radio-group card separator dialog aspect-ratio sidebar`,
           projectPath
         );
         return "shadcn-svelte components installed successfully!";

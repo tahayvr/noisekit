@@ -15,14 +15,14 @@ A web dev stack by noiseRandom.
 - [SvelteKit](https://svelte.dev/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
-- [Shadcn](https://next.shadcn-svelte.com/) Coming Soon
+- [Shadcn](https://next.shadcn-svelte.com/)
 
 ## Getting Started
 
 To start a new project using the noiseKit stack, run the following command:
 
 ```bash
-npx noisekit
+npx noisekit@latest
 ```
 
 After the process completes, you can navigate into your new SvelteKit project directory:
