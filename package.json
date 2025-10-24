@@ -1,6 +1,6 @@
 {
   "name": "noisekit",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "description": "Start a SvelteKit project with the noiseKit stack.",
   "main": "lib/index.js",
@@ -34,7 +34,8 @@
   "dependencies": {
     "@clack/prompts": "^0.10.1",
     "gradient-string": "^3.0.0",
-    "picocolors": "^1.1.1"
+    "picocolors": "^1.1.1",
+    "shadcn-svelte": "^1.0.9"
   },
   "devDependencies": {
     "semantic-release": "^24.2.3"

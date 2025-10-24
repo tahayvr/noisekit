@@ -92,19 +92,19 @@ async function run() {
   // Define package installation configuration with custom commands
   const packageConfigs = {
     eslint: {
-      command: "npx sv add eslint --no-preconditions",
+      command: "npx sv add eslint",
       description: "Installing ESLint",
     },
     prettier: {
-      command: "npx sv add prettier --no-preconditions",
+      command: "npx sv add prettier",
       description: "Installing Prettier",
     },
     playwright: {
-      command: "npx sv add playwright --no-preconditions",
+      command: "npx sv add playwright",
       description: "Installing Playwright",
     },
     vitest: {
-      command: "npx sv add vitest --no-preconditions",
+      command: "npx sv add vitest",
       description: "Installing Vitest",
     },
     "svelte-seo": {
@@ -171,7 +171,7 @@ async function run() {
         try {
           // Try the basic tailwindcss installation first
           execSilent(
-            `npx sv add tailwindcss="plugins:typography" --no-preconditions --no-install`,
+            `npx sv add tailwindcss="plugins:typography"`,
             projectPath
           );
 
@@ -191,7 +191,7 @@ async function run() {
       task: async () => {
         await sleep(300);
         execSilent(
-          `npx shadcn-svelte@latest init --base-color zinc --css 'src/app.css' --components-alias '$lib/components' --lib-alias '$lib' --utils-alias '$lib/utils' --hooks-alias '$lib/hooks' --ui-alias '$lib/components/ui'`,
+          `npx shadcn-svelte@latest init --base-color neutral --css 'src/app.css' --components-alias '$lib/components' --lib-alias '$lib' --utils-alias '$lib/utils' --hooks-alias '$lib/hooks' --ui-alias '$lib/components/ui'`,
           projectPath
         );
         return "shadcn-svelte installed successfully!";
