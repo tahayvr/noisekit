@@ -35,6 +35,15 @@ function execSilent(command, cwd = process.cwd()) {
   }
 }
 
+// Execute command with inherited stdio (for interactive commands)
+function execInteractive(command, cwd = process.cwd()) {
+  try {
+    return execSync(command, { stdio: "inherit", cwd });
+  } catch (error) {
+    throw new Error(`Command failed: ${command}`);
+  }
+}
+
 // Main function
 async function run() {
   // Start with banner and intro
@@ -61,6 +70,29 @@ async function run() {
 
   // Project path
   const projectPath = `./${projectName}`;
+
+  // Adapter selection
+  const adapter = await p.select({
+    message: "Which adapter would you like to use?",
+    options: [
+      {
+        value: "node",
+        label: "Node",
+        hint: "standalone Node server",
+      },
+      {
+        value: "static",
+        label: "Static",
+        hint: "static site generator (SSG)",
+      },
+    ],
+  });
+
+  // Handle cancellation
+  if (p.isCancel(adapter)) {
+    p.cancel("Operation cancelled.");
+    process.exit(0);
+  }
 
   // Additional utilities
   const utilities = await p.multiselect({
@@ -121,7 +153,7 @@ async function run() {
   // Show summary before starting
   p.note(
     `• App Name: ${color.yellow(projectName)}\n` +
-      // No need to show components in summary since it's not selectable now
+      `• Adapter: ${color.yellow(adapter)}\n` +
       `• Additional Packages: ${
         utilities.length > 0
           ? "\n  " +
@@ -168,20 +200,25 @@ async function run() {
       title: "Setting up Tailwind CSS with Typography",
       task: async () => {
         await sleep(300);
-        try {
-          // Try the basic tailwindcss installation first
-          execSilent(
-            `npx sv add tailwindcss="plugins:typography"`,
-            projectPath
-          );
+        // Install Tailwind CSS v4 with typography plugin
+        execSilent(
+          `npx sv add --no-git-check tailwindcss="plugins:typography"`,
+          projectPath
+        );
+        return "Tailwind CSS configured successfully!";
+      },
+    },
 
-          // Install dependencies after Tailwind is set up
-          execSilent(`npm install`, projectPath);
-          return "Tailwind CSS configured successfully!";
-        } catch (error) {
-          console.error("Tailwind installation error:", error.message);
-          throw error;
-        }
+    // Configure SvelteKit adapter
+    {
+      title: `Configuring ${adapter} adapter`,
+      task: async () => {
+        await sleep(300);
+        execSilent(
+          `npx sv add --no-git-check sveltekit-adapter=adapter:${adapter}`,
+          projectPath
+        );
+        return `${adapter} adapter configured successfully!`;
       },
     },
 
@@ -191,7 +228,7 @@ async function run() {
       task: async () => {
         await sleep(300);
         execSilent(
-          `npx shadcn-svelte@latest init --base-color neutral --css 'src/app.css' --components-alias '$lib/components' --lib-alias '$lib' --utils-alias '$lib/utils' --hooks-alias '$lib/hooks' --ui-alias '$lib/components/ui'`,
+          `npx shadcn-svelte@latest init --no-deps --overwrite --base-color neutral --css src/app.css --components-alias '$lib/components' --lib-alias '$lib' --utils-alias '$lib/utils' --hooks-alias '$lib/hooks' --ui-alias '$lib/components/ui'`,
           projectPath
         );
         return "shadcn-svelte installed successfully!";
