@@ -1,6 +1,6 @@
 # {{PROJECT_NAME}}
 
-A SvelteKit project created with [noiseKit](https://github.com/tahayvr/noisekit) - the noiseRandom SvelteKit starter.
+A SvelteKit project created with [noiseKit](https://github.com/tahayvr/noisekit).
 
 ## Your Stack
 
@@ -33,21 +33,6 @@ Preview the production build:
 
 ```bash
 npm run preview
-```
-
-## Project Structure
-
-```
-├── src/
-│   ├── lib/
-│   │   ├── components/    # Your components
-│   │   │   └── ui/        # shadcn-svelte components
-│   │   ├── utils/         # Utility functions
-│   │   └── hooks/         # Custom hooks
-│   ├── routes/            # SvelteKit routes
-│   └── app.css            # Global styles
-├── static/                # Static assets
-└── svelte.config.js       # SvelteKit configuration
 ```
 
 ## Learn More

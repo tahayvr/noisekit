@@ -428,7 +428,7 @@ export const prerender = true;
       `To get started:\n` +
       `•  ${color.yellow(`cd ${projectName}`)}\n` +
       `•  ${color.yellow("npm run dev")}\n\n` +
-      `Happy coding! 🚀`
+      `Cheers Mate!`
   );
 }
 
