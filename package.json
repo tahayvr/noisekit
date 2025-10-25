@@ -34,8 +34,7 @@
   "dependencies": {
     "@clack/prompts": "^0.10.1",
     "gradient-string": "^3.0.0",
-    "picocolors": "^1.1.1",
-    "shadcn-svelte": "^1.0.9"
+    "picocolors": "^1.1.1"
   },
   "devDependencies": {
     "semantic-release": "^24.2.3"

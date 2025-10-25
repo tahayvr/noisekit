@@ -227,7 +227,6 @@ async function run() {
     `${color.red("✓")} ${color.bold("Project created successfully!")}\n\n` +
       `To get started:\n` +
       `•  ${color.yellow(`cd ${projectName}`)}\n` +
-      `•  ${color.yellow("npm install")}\n` +
       `•  ${color.yellow("npm run dev")}\n\n` +
       `Happy coding! 🚀`
   );
