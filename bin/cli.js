@@ -1,11 +1,18 @@
 #!/usr/bin/env node
 
 import { execSync } from "child_process";
+import { readFileSync, writeFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import gradient from "gradient-string";
 import process from "process";
 import * as p from "@clack/prompts";
 import { setTimeout as sleep } from "node:timers/promises";
 import color from "picocolors";
+
+// Get the directory of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Banner
 function displayBanner() {
@@ -368,6 +375,38 @@ async function run() {
       task: async () => {
         await sleep(300);
         execSilent(`npm install`, projectPath);
+
+        // Replace README with custom template
+        const templatePath = join(__dirname, "..", "templates", "README.md");
+        const readmePath = join(projectPath, "README.md");
+        const template = readFileSync(templatePath, "utf-8");
+
+        // Build Drizzle setup text
+        let drizzleSetup = "";
+        if (drizzleConfig) {
+          drizzleSetup = `\n- **Drizzle ORM**: ${drizzleConfig.database} with ${
+            drizzleConfig.client
+          }${drizzleConfig.docker ? " + Docker Compose" : ""}`;
+        }
+
+        // Build additional packages text
+        let additionalPackages = "";
+        if (utilities.length > 0) {
+          const formattedTools = utilities
+            .map((tool) => tool.charAt(0).toUpperCase() + tool.slice(1))
+            .join(", ");
+          additionalPackages = "\n- **Additional Tools**: " + formattedTools;
+        }
+
+        // Replace all placeholders
+        const customReadme = template
+          .replace(/{{PROJECT_NAME}}/g, projectName)
+          .replace(/{{ADAPTER}}/g, adapter)
+          .replace(/{{DRIZZLE_SETUP}}/g, drizzleSetup)
+          .replace(/{{ADDITIONAL_PACKAGES}}/g, additionalPackages);
+
+        writeFileSync(readmePath, customReadme);
+
         return "All dependencies installed successfully!";
       },
     },
