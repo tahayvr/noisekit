@@ -10,9 +10,8 @@ import * as p from "@clack/prompts";
 import { setTimeout as sleep } from "node:timers/promises";
 import color from "picocolors";
 
-// Banner display with "DEV MODE" indicator
+// Banner
 function displayBanner() {
-  // Custom gradient colors
   const gradientColors = gradient([
     "#F59E0B", // noiseKit AMBER
     "#B91C1C", // noiseKit RED
@@ -28,7 +27,6 @@ function displayBanner() {
                                                 
   `)
   );
-  console.log(color.magenta("  [ DEVELOPMENT MODE ]"));
 }
 
 // Execute command silently and return output
@@ -40,17 +38,25 @@ function execSilent(command, cwd = process.cwd()) {
   }
 }
 
+// Execute command with inherited stdio (for interactive commands)
+function execInteractive(command, cwd = process.cwd()) {
+  try {
+    return execSync(command, { stdio: "inherit", cwd });
+  } catch (error) {
+    throw new Error(`Command failed: ${command}`);
+  }
+}
+
 // Main function
 async function run() {
   // Start with banner and intro
   displayBanner();
-  p.intro(`${color.red("noiseKit")} - Modern SvelteKit Starter`);
+  p.intro(`${color.red("noiseKit")} - noiseRandom SvelteKit Starter`);
 
-  // Get project name with test prefix to avoid conflicts
+  // Get project name
   const projectName = await p.text({
     message: "What would you like to name your app?",
-    placeholder: "test-project",
-    initialValue: `test-${Date.now().toString().slice(-6)}`,
+    placeholder: "my-sveltekit-app",
     validate(value) {
       if (!value) return "Please enter an app name.";
       if (value.includes(" ")) return "App name cannot contain spaces.";
@@ -68,8 +74,115 @@ async function run() {
   // Project path
   const projectPath = `./${projectName}`;
 
-  // Skip component selection for now
-  // const components = ["none"];
+  // Adapter selection
+  const adapter = await p.select({
+    message: "Which adapter would you like to use?",
+    options: [
+      {
+        value: "node",
+        label: "Node",
+        hint: "standalone Node server",
+      },
+      {
+        value: "static",
+        label: "Static",
+        hint: "static site generator (SSG)",
+      },
+    ],
+  });
+
+  // Handle cancellation
+  if (p.isCancel(adapter)) {
+    p.cancel("Operation cancelled.");
+    process.exit(0);
+  }
+
+  // Drizzle ORM setup
+  const useDrizzle = await p.confirm({
+    message: "Would you like to add Drizzle ORM?",
+    initialValue: false,
+  });
+
+  // Handle cancellation
+  if (p.isCancel(useDrizzle)) {
+    p.cancel("Operation cancelled.");
+    process.exit(0);
+  }
+
+  let drizzleConfig = null;
+  if (useDrizzle) {
+    const database = await p.select({
+      message: "Which database would you like to use?",
+      options: [
+        {
+          value: "postgresql",
+          label: "PostgreSQL",
+          hint: "most popular open source database",
+        },
+        {
+          value: "mysql",
+          label: "MySQL",
+          hint: "another popular open source database",
+        },
+        {
+          value: "sqlite",
+          label: "SQLite",
+          hint: "file-based database",
+        },
+      ],
+    });
+
+    if (p.isCancel(database)) {
+      p.cancel("Operation cancelled.");
+      process.exit(0);
+    }
+
+    // Client options based on database
+    const clientOptions = {
+      postgresql: [
+        { value: "postgres.js", label: "postgres.js" },
+        { value: "neon", label: "Neon" },
+      ],
+      mysql: [
+        { value: "mysql2", label: "mysql2" },
+        { value: "planetscale", label: "PlanetScale" },
+      ],
+      sqlite: [
+        { value: "better-sqlite3", label: "better-sqlite3" },
+        { value: "libsql", label: "libsql" },
+        { value: "turso", label: "Turso" },
+      ],
+    };
+
+    const client = await p.select({
+      message: "Which SQL client would you like to use?",
+      options: clientOptions[database],
+    });
+
+    if (p.isCancel(client)) {
+      p.cancel("Operation cancelled.");
+      process.exit(0);
+    }
+
+    let docker = false;
+    if (database === "postgresql" || database === "mysql") {
+      docker = await p.confirm({
+        message: "Would you like to add Docker Compose configuration?",
+        initialValue: false,
+      });
+
+      if (p.isCancel(docker)) {
+        p.cancel("Operation cancelled.");
+        process.exit(0);
+      }
+    }
+
+    drizzleConfig = {
+      database,
+      client,
+      docker,
+    };
+  }
 
   // Additional utilities
   const utilities = await p.multiselect({
@@ -101,19 +214,19 @@ async function run() {
   // Define package installation configuration with custom commands
   const packageConfigs = {
     eslint: {
-      command: "npx sv add eslint --no-preconditions",
+      command: "npx sv add eslint",
       description: "Installing ESLint",
     },
     prettier: {
-      command: "npx sv add prettier --no-preconditions",
+      command: "npx sv add prettier",
       description: "Installing Prettier",
     },
     playwright: {
-      command: "npx sv add playwright --no-preconditions",
+      command: "npx sv add playwright",
       description: "Installing Playwright",
     },
     vitest: {
-      command: "npx sv add vitest --no-preconditions",
+      command: "npx sv add vitest",
       description: "Installing Vitest",
     },
     "svelte-seo": {
@@ -121,15 +234,6 @@ async function run() {
       description: "Installing SEO package",
     },
   };
-
-  // Create component list for shadcn
-  // const componentMap = {
-  //   basic: ["button", "input", "textarea, label"],
-  //   form: ["select", "checkbox", "radio-group"],
-  //   layout: ["card", "separator", "aspect-ratio", "sidebar"],
-  //   dialog: ["dialog"],
-  //   none: [],
-  // };
 
   // Create list of selected package configurations
   const selectedPackageConfigs = utilities
@@ -139,7 +243,16 @@ async function run() {
   // Show summary before starting
   p.note(
     `• App Name: ${color.yellow(projectName)}\n` +
-      // No need to show components in summary since it's not selectable now
+      `• Adapter: ${color.yellow(adapter)}\n` +
+      `• Drizzle ORM: ${
+        drizzleConfig
+          ? color.yellow(
+              `${drizzleConfig.database} + ${drizzleConfig.client}${
+                drizzleConfig.docker ? " + Docker" : ""
+              }`
+            )
+          : color.yellow("No")
+      }\n` +
       `• Additional Packages: ${
         utilities.length > 0
           ? "\n  " +
@@ -148,16 +261,6 @@ async function run() {
       }`,
     "Creating your noiseKit project"
   );
-
-  // Confirmation
-  const confirmed = await p.confirm({
-    message: "Ready to create your app?",
-  });
-
-  if (p.isCancel(confirmed) || !confirmed) {
-    p.cancel("Operation cancelled.");
-    process.exit(0);
-  }
 
   // Use task system to execute all tasks with spinners
   await p.tasks([
@@ -168,31 +271,13 @@ async function run() {
         execSilent(
           `npx sv create ${projectName} --template minimal --types ts --no-add-ons --install npm`
         );
+        execSilent(`mkdir -p src/lib/components`, projectPath);
+        execSilent(`mkdir -p src/lib/utils`, projectPath);
+        execSilent(`mkdir -p src/lib/hooks`, projectPath);
+        execSilent(`mkdir -p src/lib/components/ui`, projectPath);
         return "SvelteKit project created successfully!";
       },
     },
-
-    // Commenting out shadcn initialization temporarily
-    /*
-    {
-      title: 'Initializing shadcn-svelte',
-      task: async () => {
-        await sleep(300);
-        execSilent(`npx shadcn-svelte@next init`, projectPath);
-        return 'shadcn-svelte initialized successfully!';
-      }
-    },
-    {
-      title: 'Installing UI components',
-      task: async () => {
-        await sleep(300);
-        if (selectedComponents) {
-          execSilent(`npx shadcn-svelte@next add -y ${selectedComponents}`, projectPath);
-        }
-        return 'UI components installed successfully!';
-      }
-    },
-    */
 
     // Create dynamic tasks for each selected package
     ...selectedPackageConfigs.map((pkg) => ({
@@ -206,23 +291,81 @@ async function run() {
           await pkg.postInstall(projectPath);
         }
 
-        return `${pkg.description} completed`;
+        return `${pkg.description} completed!`;
       },
     })),
+
     {
       title: "Setting up Tailwind CSS with Typography",
       task: async () => {
         await sleep(300);
+        // Install Tailwind CSS v4 with typography plugin
         execSilent(
-          `npx sv@0.6.18 add --tailwindcss=typography --no-install --no-preconditions`,
+          `npx sv add --no-git-check tailwindcss="plugins:typography"`,
           projectPath
         );
-        // Install dependencies after Tailwind is set up
-        execSilent(`npm install`, projectPath);
         return "Tailwind CSS configured successfully!";
       },
     },
 
+    // Configure SvelteKit adapter
+    {
+      title: `Configuring ${adapter} adapter`,
+      task: async () => {
+        await sleep(300);
+        execSilent(
+          `npx sv add --no-git-check sveltekit-adapter=adapter:${adapter}`,
+          projectPath
+        );
+        return `${adapter} adapter configured successfully!`;
+      },
+    },
+
+    // Configure Drizzle ORM if selected
+    ...(drizzleConfig
+      ? [
+          {
+            title: "Setting up Drizzle ORM",
+            task: async () => {
+              await sleep(300);
+              let drizzleCommand = `npx sv add --no-git-check drizzle=database:${drizzleConfig.database}+client:${drizzleConfig.client}`;
+              if (drizzleConfig.docker) {
+                drizzleCommand += "+docker:yes";
+              }
+              execSilent(drizzleCommand, projectPath);
+              return "Drizzle ORM configured successfully!";
+            },
+          },
+        ]
+      : []),
+
+    //install shadcn-svelte
+    {
+      title: "Installing shadcn-svelte",
+      task: async () => {
+        await sleep(300);
+        execSilent(
+          `npx shadcn-svelte@latest init --no-deps --overwrite --base-color neutral --css src/app.css --components-alias '$lib/components' --lib-alias '$lib' --utils-alias '$lib/utils' --hooks-alias '$lib/hooks' --ui-alias '$lib/components/ui'`,
+          projectPath
+        );
+        return "shadcn-svelte installed successfully!";
+      },
+    },
+
+    //install shadcn-svelte component
+    {
+      title: "Installing shadcn-svelte components",
+      task: async () => {
+        await sleep(300);
+        execSilent(
+          `npx shadcn-svelte@latest add --yes button input textarea label select checkbox radio-group card separator dialog aspect-ratio sidebar`,
+          projectPath
+        );
+        return "shadcn-svelte components installed successfully!";
+      },
+    },
+
+    //finalize project setup
     {
       title: "Finalizing project setup",
       task: async () => {
@@ -238,7 +381,6 @@ async function run() {
     `${color.red("✓")} ${color.bold("Project created successfully!")}\n\n` +
       `To get started:\n` +
       `•  ${color.yellow(`cd ${projectName}`)}\n` +
-      `•  ${color.yellow("npm install")}\n` +
       `•  ${color.yellow("npm run dev")}\n\n` +
       `Happy coding! 🚀`
   );
