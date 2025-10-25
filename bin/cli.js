@@ -321,6 +321,16 @@ async function run() {
           `npx sv add --no-git-check sveltekit-adapter=adapter:${adapter}`,
           projectPath
         );
+
+        // If static adapter, add prerender to root layout
+        if (adapter === "static") {
+          const layoutPath = join(projectPath, "src", "routes", "+layout.ts");
+          const layoutContent = `// Prerender all pages for static site generation
+export const prerender = true;
+`;
+          writeFileSync(layoutPath, layoutContent);
+        }
+
         return `${adapter} adapter configured successfully!`;
       },
     },
