@@ -94,6 +94,93 @@ async function run() {
     process.exit(0);
   }
 
+  // Drizzle ORM setup
+  const useDrizzle = await p.confirm({
+    message: "Would you like to add Drizzle ORM?",
+    initialValue: false,
+  });
+
+  // Handle cancellation
+  if (p.isCancel(useDrizzle)) {
+    p.cancel("Operation cancelled.");
+    process.exit(0);
+  }
+
+  let drizzleConfig = null;
+  if (useDrizzle) {
+    const database = await p.select({
+      message: "Which database would you like to use?",
+      options: [
+        {
+          value: "postgresql",
+          label: "PostgreSQL",
+          hint: "most popular open source database",
+        },
+        {
+          value: "mysql",
+          label: "MySQL",
+          hint: "another popular open source database",
+        },
+        {
+          value: "sqlite",
+          label: "SQLite",
+          hint: "file-based database",
+        },
+      ],
+    });
+
+    if (p.isCancel(database)) {
+      p.cancel("Operation cancelled.");
+      process.exit(0);
+    }
+
+    // Client options based on database
+    const clientOptions = {
+      postgresql: [
+        { value: "postgres.js", label: "postgres.js" },
+        { value: "neon", label: "Neon" },
+      ],
+      mysql: [
+        { value: "mysql2", label: "mysql2" },
+        { value: "planetscale", label: "PlanetScale" },
+      ],
+      sqlite: [
+        { value: "better-sqlite3", label: "better-sqlite3" },
+        { value: "libsql", label: "libsql" },
+        { value: "turso", label: "Turso" },
+      ],
+    };
+
+    const client = await p.select({
+      message: "Which SQL client would you like to use?",
+      options: clientOptions[database],
+    });
+
+    if (p.isCancel(client)) {
+      p.cancel("Operation cancelled.");
+      process.exit(0);
+    }
+
+    let docker = false;
+    if (database === "postgresql" || database === "mysql") {
+      docker = await p.confirm({
+        message: "Would you like to add Docker Compose configuration?",
+        initialValue: false,
+      });
+
+      if (p.isCancel(docker)) {
+        p.cancel("Operation cancelled.");
+        process.exit(0);
+      }
+    }
+
+    drizzleConfig = {
+      database,
+      client,
+      docker,
+    };
+  }
+
   // Additional utilities
   const utilities = await p.multiselect({
     message: "Would you like to install additional packages?",
@@ -154,6 +241,15 @@ async function run() {
   p.note(
     `• App Name: ${color.yellow(projectName)}\n` +
       `• Adapter: ${color.yellow(adapter)}\n` +
+      `• Drizzle ORM: ${
+        drizzleConfig
+          ? color.yellow(
+              `${drizzleConfig.database} + ${drizzleConfig.client}${
+                drizzleConfig.docker ? " + Docker" : ""
+              }`
+            )
+          : color.yellow("No")
+      }\n` +
       `• Additional Packages: ${
         utilities.length > 0
           ? "\n  " +
@@ -221,6 +317,24 @@ async function run() {
         return `${adapter} adapter configured successfully!`;
       },
     },
+
+    // Configure Drizzle ORM if selected
+    ...(drizzleConfig
+      ? [
+          {
+            title: "Setting up Drizzle ORM",
+            task: async () => {
+              await sleep(300);
+              let drizzleCommand = `npx sv add --no-git-check drizzle=database:${drizzleConfig.database}+client:${drizzleConfig.client}`;
+              if (drizzleConfig.docker) {
+                drizzleCommand += "+docker:yes";
+              }
+              execSilent(drizzleCommand, projectPath);
+              return "Drizzle ORM configured successfully!";
+            },
+          },
+        ]
+      : []),
 
     //install shadcn-svelte
     {
