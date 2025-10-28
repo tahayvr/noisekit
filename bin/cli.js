@@ -359,7 +359,7 @@ export const prerender = true;
       task: async () => {
         await sleep(300);
         execSilent(
-          `npx shadcn-svelte@latest init --no-deps --overwrite --base-color neutral --css src/app.css --components-alias '$lib/components' --lib-alias '$lib' --utils-alias '$lib/utils' --hooks-alias '$lib/hooks' --ui-alias '$lib/components/ui'`,
+          `npx shadcn-svelte@latest init --overwrite --base-color neutral --css src/app.css --components-alias '$lib/components' --lib-alias '$lib' --utils-alias '$lib/utils' --hooks-alias '$lib/hooks' --ui-alias '$lib/components/ui'`,
           projectPath
         );
         return "shadcn-svelte installed successfully!";
@@ -417,6 +417,9 @@ export const prerender = true;
 
         writeFileSync(readmePath, customReadme);
 
+        // Final npm install silently without UI output
+        execSilent(`npm install`, projectPath);
+
         return "All dependencies installed successfully!";
       },
     },
@@ -427,6 +430,7 @@ export const prerender = true;
     `${color.red("✓")} ${color.bold("Project created successfully!")}\n\n` +
       `To get started:\n` +
       `•  ${color.yellow(`cd ${projectName}`)}\n` +
+      `•  ${color.yellow("npm install")}\n` +
       `•  ${color.yellow("npm run dev")}\n\n` +
       `Cheers Mate!`
   );
