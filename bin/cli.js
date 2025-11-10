@@ -266,17 +266,6 @@ async function run() {
 			}
 		},
 
-		// Install ESLint and Prettier silently (always included)
-		{
-			title: 'Setting up code quality tools',
-			task: async () => {
-				await sleep(300);
-				execSilent('npx sv add eslint', projectPath);
-				execSilent('npx sv add prettier', projectPath);
-				return 'ESLint and Prettier configured successfully!';
-			}
-		},
-
 		// Create dynamic tasks for each selected package
 		...selectedPackageConfigs.map((pkg) => ({
 			title: pkg.description,
@@ -372,6 +361,11 @@ export const prerender = true;
 			title: 'Finalizing project setup',
 			task: async () => {
 				await sleep(300);
+
+				// Install ESLint and Prettier silently (always included)
+				execSilent('npx sv add eslint', projectPath);
+				execSilent('npx sv add prettier', projectPath);
+
 				execSilent(`npm install`, projectPath);
 
 				// Replace README with custom template
