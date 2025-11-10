@@ -192,12 +192,6 @@ async function run() {
 	const utilities = await p.multiselect({
 		message: 'Would you like to install additional packages?',
 		options: [
-			{ value: 'eslint', label: 'ESLint', hint: 'linting' },
-			{
-				value: 'prettier',
-				label: 'Prettier',
-				hint: 'code formatting'
-			},
 			{ value: 'playwright', label: 'Playwright', hint: 'browser testing' },
 			{ value: 'vitest', label: 'Vitest', hint: 'testing' },
 			{
@@ -217,14 +211,6 @@ async function run() {
 
 	// Define package installation configuration with custom commands
 	const packageConfigs = {
-		eslint: {
-			command: 'npx sv add eslint',
-			description: 'Installing ESLint'
-		},
-		prettier: {
-			command: 'npx sv add prettier',
-			description: 'Installing Prettier'
-		},
 		playwright: {
 			command: 'npx sv add playwright',
 			description: 'Installing Playwright'
@@ -277,6 +263,17 @@ async function run() {
 				execSilent(`mkdir -p src/lib/hooks`, projectPath);
 				execSilent(`mkdir -p src/lib/components/ui`, projectPath);
 				return 'SvelteKit project created successfully!';
+			}
+		},
+
+		// Install ESLint and Prettier silently (always included)
+		{
+			title: 'Setting up code quality tools',
+			task: async () => {
+				await sleep(300);
+				execSilent('npx sv add eslint', projectPath);
+				execSilent('npx sv add prettier', projectPath);
+				return 'ESLint and Prettier configured successfully!';
 			}
 		},
 
